@@ -42,7 +42,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <>
       <header className="app-header" style={{ justifyContent: 'space-between' }}>
         <span style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 300, fontSize: 22, letterSpacing: 3, color: 'var(--text)' }}>
-          Z<span style={{ color: 'var(--accent)' }}>Æ</span><span style={{ color: 'var(--muted)', fontSize: 13, marginLeft: 1 }}>VA</span>
+          N<span style={{ color: 'var(--accent)' }}>Y</span>LVA
         </span>
         {!isInstalled && (
           <button onClick={isIOS ? () => setShowBanner(true) : install}

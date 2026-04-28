@@ -46,7 +46,7 @@ export default function LandingPage() {
   return (
     <>
       <nav className={scrolled ? 'scrolled' : ''}>
-        <a href="#" className="nav-logo">Z<em>A</em>EVA</a>
+        <a href="#" className="nav-logo">N<em>Y</em>LVA</a>
         <div className="nav-links">
           <a href="#features">Fonctionnalités</a>
           <a href="#pricing">Tarifs</a>

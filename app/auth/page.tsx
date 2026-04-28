@@ -48,9 +48,9 @@ export default function PageAuth() {
     }}>
       <div style={{ marginBottom: 40, textAlign: 'center' }}>
         <div style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 300, fontSize: 52, letterSpacing: 4 }}>
-          Z<span style={{ color: 'var(--accent)' }}>A</span>
+          N<span style={{ color: 'var(--accent)' }}>Y</span>LVA
         </div>
-        <div style={{ color: 'var(--muted)', fontSize: 13, letterSpacing: 6, textTransform: 'uppercase', marginTop: -4 }}>EVA</div>
+
         <p style={{ color: 'var(--muted)', fontSize: 13, marginTop: 12 }}>Beauty Intelligence</p>
       </div>
 
