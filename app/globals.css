@@ -1,0 +1,191 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* ── Fonds ivoire chaud ── */
+  --bg:      #FBF7F4;
+  --bg1:     #F5EEE8;
+  --bg2:     #EDE4DB;
+  --bg3:     #E3D6CA;
+
+  /* ── Textes ── */
+  --text:    #1C1410;
+  --text2:   #4A3728;
+  --muted:   #9B8070;
+
+  /* ── Accents rose poudré + or naturel ── */
+  --accent:  #C4758A;
+  --accent2: #A85A70;
+  --gold:    #B8934A;
+  --gold2:   #D4A96A;
+
+  /* ── États ── */
+  --green:   #5A9E7A;
+  --amber:   #C4863A;
+  --red:     #C45A6A;
+
+  /* ── Bordures ── */
+  --border:  rgba(180,130,110,0.18);
+  --border2: rgba(180,130,110,0.32);
+
+  /* ── Ombres ── */
+  --shadow-sm: 0 2px 12px rgba(100,60,40,0.07);
+  --shadow-md: 0 6px 28px rgba(100,60,40,0.10);
+  --shadow-lg: 0 16px 48px rgba(100,60,40,0.14);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+h1, h2, h3, .font-display {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-weight: 300;
+  color: var(--text);
+}
+
+/* ── Cards ── */
+.nylva-card {
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── Boutons ── */
+.nylva-btn-primary {
+  background: var(--accent);
+  color: #FFFFFF;
+  font-weight: 600;
+  border-radius: 14px;
+  padding: 13px 24px;
+  font-size: 14px;
+  transition: all 0.2s;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  letter-spacing: 0.02em;
+  box-shadow: 0 4px 16px rgba(196,117,138,0.28);
+}
+.nylva-btn-primary:hover { background: var(--accent2); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(196,117,138,0.38); }
+.nylva-btn-primary:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+
+.nylva-btn-ghost {
+  background: transparent;
+  color: var(--text2);
+  border: 1px solid var(--border2);
+  border-radius: 14px;
+  padding: 13px 24px;
+  font-size: 14px;
+  transition: all 0.2s;
+  cursor: pointer;
+  width: 100%;
+}
+.nylva-btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── Inputs ── */
+.nylva-input {
+  background: #FFFFFF;
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 12px 16px;
+  color: var(--text);
+  font-size: 14px;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-shadow: var(--shadow-sm);
+}
+.nylva-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(196,117,138,0.1); }
+.nylva-input::placeholder { color: var(--muted); }
+
+select.nylva-input {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239B8070' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+}
+
+.nylva-label {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 6px;
+  display: block;
+  font-weight: 500;
+}
+
+/* ── Tab bar ── */
+.tab-bar {
+  position: fixed; bottom: 0; left: 0; right: 0; height: 68px;
+  background: rgba(251,247,244,0.95);
+  backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-around;
+  z-index: 100; padding-bottom: env(safe-area-inset-bottom);
+  box-shadow: 0 -4px 20px rgba(100,60,40,0.06);
+}
+.tab-item {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  color: var(--muted); font-size: 10px; padding: 8px 10px;
+  cursor: pointer; transition: color 0.2s; text-decoration: none; font-weight: 400;
+}
+.tab-item.active { color: var(--accent); font-weight: 600; }
+.tab-item svg { width: 20px; height: 20px; }
+
+/* ── App shell ── */
+.app-content { min-height: 100dvh; padding-bottom: 84px; padding-top: 60px; background: var(--bg); }
+.app-header {
+  position: fixed; top: 0; left: 0; right: 0; height: 60px;
+  background: rgba(251,247,244,0.95); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; padding: 0 20px; z-index: 100;
+  box-shadow: 0 2px 12px rgba(100,60,40,0.05);
+}
+
+/* ── Zones ── */
+.zone-chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; }
+.zone-chip.ok   { background: rgba(90,158,122,0.1);  color: var(--green); }
+.zone-chip.warn { background: rgba(196,134,58,0.1);  color: var(--amber); }
+.zone-chip.err  { background: rgba(196,90,106,0.1);  color: var(--red); }
+
+/* ── Animations ── */
+@keyframes pulse-rose { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.94)} }
+.pulse { animation: pulse-rose 1.8s ease-in-out infinite; }
+
+@keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+.fade-up { animation: fadeUp 0.4s ease both; }
+
+@keyframes shimmer { 0%{background-position:-200% center} 100%{background-position:200% center} }
+
+/* ── Premium gradient ── */
+.premium-gradient {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--gold) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+
+/* ── Grain texture douce ── */
+body::before {
+  content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E");
+  background-size: 256px;
+}
+body > * { position: relative; z-index: 1; }
+
+/* ── Score ring ── */
+.score-ring-track { fill: none; stroke: rgba(0,0,0,0.06); }
+.score-ring-fill  { fill: none; stroke-linecap: round; transition: stroke-dasharray .8s cubic-bezier(.4,0,.2,1); }
