@@ -903,7 +903,7 @@ export default function MarquesPage() {
                         style={{ color: '#BBB', transition: 'color 0.15s' }}
                         onMouseEnter={e => (e.currentTarget.style.color = c.color)}
                         onMouseLeave={e => (e.currentTarget.style.color = '#BBB')}>
-                        <Instagram size={15} />
+                        <ExternalLink size={15} />
                       </a>
                     )}
                     {c.youtube && (
@@ -911,7 +911,7 @@ export default function MarquesPage() {
                         style={{ color: '#BBB', transition: 'color 0.15s' }}
                         onMouseEnter={e => (e.currentTarget.style.color = c.color)}
                         onMouseLeave={e => (e.currentTarget.style.color = '#BBB')}>
-                        <Youtube size={15} />
+                        <ExternalLink size={15} />
                       </a>
                     )}
                     {c.tiktok && (
