@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Search, ExternalLink, Mail, Instagram, Youtube, Star, Award, Users, BarChart3, Sparkles, ChevronRight } from 'lucide-react';
+import { Search, ExternalLink, Mail, Star, Award, Users, BarChart3, Sparkles, ChevronRight } from 'lucide-react';
 
 // ─── DATA ────────────────────────────────────────────────────────────────────
 
@@ -496,7 +496,7 @@ function BrandModal({ brand, onClose }: { brand: Brand; onClose: () => void }) {
               background: brand.accentColor, color: 'white',
               textDecoration: 'none', fontSize: 13, fontWeight: 600,
             }}>
-            <Instagram size={14} /> Instagram
+            <ExternalLink size={14} /> Instagram
           </a>
           {brand.youtube && (
             <a href={brand.youtube} target="_blank" rel="noopener noreferrer"
@@ -506,7 +506,7 @@ function BrandModal({ brand, onClose }: { brand: Brand; onClose: () => void }) {
                 background: 'white', border: '1px solid #E8DDD5',
                 color: '#444', textDecoration: 'none', fontSize: 13, fontWeight: 600,
               }}>
-              <Youtube size={14} /> YouTube
+              <ExternalLink size={14} /> YouTube
             </a>
           )}
         </div>
