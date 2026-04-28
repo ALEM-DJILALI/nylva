@@ -1,0 +1,9 @@
+<svg width="200" height="50" viewBox="0 0 200 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300&display=swap');
+  </style>
+  <text x="0" y="40" font-family="'Cormorant Garamond', Georgia, serif" font-size="44" font-weight="300" letter-spacing="4" fill="#1C1410">N</text>
+  <text x="32" y="40" font-family="'Cormorant Garamond', Georgia, serif" font-size="44" font-weight="300" letter-spacing="4" fill="#C4758A">Y</text>
+  <text x="65" y="40" font-family="'Cormorant Garamond', Georgia, serif" font-size="44" font-weight="300" letter-spacing="4" fill="#1C1410">LVA</text>
+  <circle cx="196" cy="8" r="4" fill="#C4758A"/>
+</svg>
