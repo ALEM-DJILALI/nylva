@@ -40,7 +40,7 @@ export default function PageMarques() {
         ← Retour
       </button>
 
-      <div className="nylva-card" style={{ marginBottom: 16, borderColor: selected.compatible ? 'rgba(93,202,165,0.3)' : 'rgba(232,127,160,0.3)' }}>
+      <div className="zaeva-card" style={{ marginBottom: 16, borderColor: selected.compatible ? 'rgba(93,202,165,0.3)' : 'rgba(232,127,160,0.3)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
           <h2 style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 300, fontSize: 26 }}>{selected.nom}</h2>
           <span style={{
@@ -55,7 +55,7 @@ export default function PageMarques() {
         <p style={{ color: 'var(--text2)', fontSize: 13 }}>Gammes : {selected.gamme}</p>
       </div>
 
-      <div className="nylva-card">
+      <div className="zaeva-card">
         <p style={{ fontSize: 12, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>
           Compatibilité profil
         </p>
@@ -83,7 +83,7 @@ export default function PageMarques() {
       <div style={{ position: 'relative', marginBottom: 12 }}>
         <Search size={16} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }} />
         <input
-          className="nylva-input"
+          className="zaeva-input"
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="Rechercher une marque"
@@ -115,7 +115,7 @@ export default function PageMarques() {
         {filtered.map(m => (
           <div
             key={m.id}
-            className="nylva-card"
+            className="zaeva-card"
             onClick={() => setSelected(m)}
             style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px' }}
           >

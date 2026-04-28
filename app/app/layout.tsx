@@ -2,14 +2,14 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Camera, Sparkles, MessageCircle, Palette, User, Download, X } from 'lucide-react'
+import { Camera, Sparkles, MessageCircle, Tag, User, Download, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 const tabs = [
   { href: '/app',           label: 'Analyse',  icon: Camera },
   { href: '/app/miroir',    label: 'Miroir IA', icon: Sparkles },
   { href: '/app/coach',     label: 'Coach',    icon: MessageCircle },
-  { href: '/app/saison',    label: 'Saison',   icon: Palette },
+  { href: '/app/marques',   label: 'Marques',  icon: Tag },
   { href: '/app/profil',    label: 'Profil',   icon: User },
 ]
 
