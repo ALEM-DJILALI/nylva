@@ -1874,7 +1874,7 @@ export default function MarquesPage() {
 
                   {/* Product categories preview */}
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: 12 }}>
-                    {[...new Set(brand.products.map(p => p.category))].map(cat => {
+                    {Array.from(new Set(brand.products.map(p => p.category))).map(cat => {
                       const labels: Partial<Record<FaceZone, string>> = { teint: '🎨 Teint', yeux: '👁️ Yeux', joues: '🌸 Joues', lèvres: '💄 Lèvres', sourcils: '✏️ Sourcils', skincare: '💧 Soin' };
                       return <span key={cat} style={{ fontSize: 10, padding: '2px 8px', borderRadius: 10, background: '#F8F3EF', color: '#888', fontWeight: 600 }}>{labels[cat] || cat}</span>;
                     })}
