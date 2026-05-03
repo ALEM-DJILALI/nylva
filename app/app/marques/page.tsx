@@ -2,12 +2,16 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import {
-  Search, ExternalLink, Mail, Instagram, Youtube,
+  Search, ExternalLink, Mail, Link2,
   Star, Award, Users, BarChart3, Sparkles, ChevronRight,
   ChevronLeft, X, Eye, Smile, Circle, Layers, Droplets,
   ArrowRight, Check, Info, Wand2, MessageSquare, SlidersHorizontal,
-  RefreshCw, Heart, ShoppingBag
+  RefreshCw, Heart, ShoppingBag, Play
 } from 'lucide-react';
+
+// Substituts pour Instagram/Youtube absents de cette version lucide-react
+const Instagram = Link2;
+const Youtube = Play;
 
 // ─── TYPES ───────────────────────────────────────────────────────────────────
 
