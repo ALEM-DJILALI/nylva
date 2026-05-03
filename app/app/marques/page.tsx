@@ -1596,7 +1596,7 @@ function BrandModal({ brand, onClose }: { brand: Brand; onClose: () => void }) {
     return () => window.removeEventListener('keydown', h);
   }, [onClose]);
 
-  const categories = ['all', ...new Set(brand.products.map(p => p.category))] as Array<FaceZone | 'all'>;
+  const categories = ['all', ...Array.from(new Set(brand.products.map(p => p.category)))] as Array<FaceZone | 'all'>;
   const ZONE_LABELS: Record<FaceZone, string> = {
     teint: 'Teint', yeux: 'Yeux', joues: 'Joues', lèvres: 'Lèvres', contour: 'Contour', sourcils: 'Sourcils', skincare: 'Skincare'
   };
