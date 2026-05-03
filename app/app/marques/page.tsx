@@ -1032,7 +1032,7 @@ const BRANDS: Brand[] = [
         price: '~18€',
         description: 'Soin anti-imperfections double action. Réduit visiblement les boutons et taches post-acné.',
         bestFor: ['warm', 'neutral', 'cool', 'olive'],
-        skinTypes: ['grasse', 'mixte', 'acnéique'],
+        skinTypes: ['grasse', 'mixte'],
         tags: ['anti-acné', 'post-acné', 'dermato'],
         url: 'https://laroche-posay.fr'
       },
