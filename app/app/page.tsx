@@ -4,12 +4,14 @@ import { useRef, useState, useEffect, useCallback } from 'react'
 import { Camera, RefreshCw, Zap, Lock, Upload, Sparkles, Volume2, Square } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 
-type ZR = { zone:string; emoji:string; status:'ok'|'warn'|'err'; note:string; conseil:string }
-type AR = { score:number; titre:string; resume:string; humeur:string; zones:ZR[]; point_fort:string; corrections:number }
+type ZR = { zone:string; emoji:string; status:'ok'|'warn'|'err'|'nu'; note:string; conseil:string }
+type Couleur = { nom:string; hex:string }
+type Tenue = { couleurs_recommandees:Couleur[]; couleurs_eviter:Couleur[]; conseil_style:string; occasion?:string }
+type AR = { id?:string; score:number; titre:string; resume:string; humeur:string; zones:ZR[]; point_fort:string|null; corrections:number; maquillage_detecte?:boolean; tenue?:Tenue; _debug?:any }
 
-const SC = { ok:'#5A9E7A', warn:'#C4863A', err:'#C45A6A' }
-const SB = { ok:'rgba(90,158,122,0.1)', warn:'rgba(196,134,58,0.1)', err:'rgba(196,90,106,0.1)' }
-const SL = { ok:'✓', warn:'!', err:'✗' }
+const SC = { ok:'#5A9E7A', warn:'#C4863A', err:'#C45A6A', nu:'#9B8070' }
+const SB = { ok:'rgba(90,158,122,0.1)', warn:'rgba(196,134,58,0.1)', err:'rgba(196,90,106,0.1)', nu:'rgba(155,128,112,0.08)' }
+const SL = { ok:'✓', warn:'!', err:'✗', nu:'○' }
 
 function useVoice() {
   const [speaking,setSpeaking]=useState(false)
@@ -39,6 +41,76 @@ function VoiceBtn({result}:{result:AR}){
   </button>)
 }
 
+function TenueCard({tenue}:{tenue:Tenue}){
+  if(!tenue||!tenue.couleurs_recommandees?.length)return null
+  return(<div className="nylva-card fade-up" style={{marginBottom:16,background:'linear-gradient(160deg,#FFFFFF 0%,#FDF7F4 100%)',border:'1px solid rgba(184,147,74,0.18)'}}>
+    <div style={{display:'flex',alignItems:'baseline',justifyContent:'space-between',marginBottom:12}}>
+      <p style={{fontSize:11,color:'var(--gold)',textTransform:'uppercase',letterSpacing:'0.12em',fontWeight:600}}>Tenue & couleurs</p>
+      {tenue.occasion&&<p style={{fontSize:10,color:'var(--muted)',fontStyle:'italic',textTransform:'lowercase'}}>{tenue.occasion}</p>}
+    </div>
+    <p style={{fontFamily:"'Cormorant Garamond',serif",fontSize:16,lineHeight:1.4,color:'var(--text)',marginBottom:14,fontStyle:'italic'}}>« {tenue.conseil_style} »</p>
+    <div style={{marginBottom:12}}>
+      <p style={{fontSize:10,color:'var(--muted)',textTransform:'uppercase',letterSpacing:'0.1em',marginBottom:8}}>À porter</p>
+      <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+        {tenue.couleurs_recommandees.map(c=>(<div key={c.hex+c.nom} style={{display:'flex',alignItems:'center',gap:6,background:'#FFFFFF',border:'1px solid var(--border)',borderRadius:20,padding:'4px 10px 4px 4px'}}>
+          <span style={{display:'inline-block',width:18,height:18,borderRadius:'50%',background:c.hex,border:'1px solid rgba(0,0,0,0.06)',flexShrink:0}}/>
+          <span style={{fontSize:12,color:'var(--text2)'}}>{c.nom}</span>
+        </div>))}
+      </div>
+    </div>
+    {tenue.couleurs_eviter?.length>0&&(<div>
+      <p style={{fontSize:10,color:'var(--muted)',textTransform:'uppercase',letterSpacing:'0.1em',marginBottom:8}}>À éviter ce soir</p>
+      <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+        {tenue.couleurs_eviter.map(c=>(<div key={c.hex+c.nom} style={{display:'flex',alignItems:'center',gap:6,background:'rgba(196,90,106,0.04)',border:'1px solid rgba(196,90,106,0.15)',borderRadius:20,padding:'4px 10px 4px 4px'}}>
+          <span style={{display:'inline-block',width:18,height:18,borderRadius:'50%',background:c.hex,border:'1px solid rgba(0,0,0,0.06)',flexShrink:0,opacity:0.65,position:'relative'}}/>
+          <span style={{fontSize:12,color:'var(--muted)',textDecoration:'line-through',textDecorationColor:'rgba(196,90,106,0.4)'}}>{c.nom}</span>
+        </div>))}
+      </div>
+    </div>)}
+  </div>)
+}
+
+function FeedbackLink({result}:{result:AR}){
+  const [open,setOpen]=useState(false)
+  const [zonesFalses,setZonesFalses]=useState<string[]>([])
+  const [comment,setComment]=useState('')
+  const [sent,setSent]=useState(false)
+  const [sending,setSending]=useState(false)
+  const toggle=(z:string)=>setZonesFalses(p=>p.includes(z)?p.filter(x=>x!==z):[...p,z])
+  const submit=async()=>{
+    setSending(true)
+    try{
+      const supabase=createClient()
+      const {data:{session}}=await supabase.auth.getSession()
+      await fetch('/api/feedback',{method:'POST',headers:{'Content-Type':'application/json',...(session?.access_token?{Authorization:`Bearer ${session.access_token}`}:{})},body:JSON.stringify({result,zones_incorrectes:zonesFalses,comment})})
+      setSent(true);setTimeout(()=>{setOpen(false);setSent(false);setZonesFalses([]);setComment('')},2000)
+    }finally{setSending(false)}
+  }
+  return(<>
+    <button onClick={()=>setOpen(true)} style={{display:'block',width:'100%',background:'none',border:'none',color:'var(--muted)',fontSize:11,padding:'8px 0',marginBottom:8,cursor:'pointer',textDecoration:'underline'}}>Cette analyse semble incorrecte ?</button>
+    {open&&(<div onClick={()=>setOpen(false)} style={{position:'fixed',inset:0,zIndex:200,background:'rgba(20,10,5,0.5)',backdropFilter:'blur(6px)',display:'flex',alignItems:'center',justifyContent:'center',padding:20}}>
+      <div onClick={e=>e.stopPropagation()} style={{background:'#FFF',borderRadius:20,padding:24,maxWidth:380,width:'100%',maxHeight:'80vh',overflowY:'auto'}}>
+        {sent?(<div style={{textAlign:'center',padding:20}}><div style={{fontSize:36,marginBottom:12}}>🙏</div><p style={{fontSize:14,color:'var(--text2)'}}>Merci, ton retour nous aide à améliorer NYLVA.</p></div>):(<>
+          <h3 style={{fontFamily:"'Cormorant Garamond',serif",fontWeight:400,fontSize:22,marginBottom:6}}>Aide-nous à nous améliorer</h3>
+          <p style={{fontSize:12,color:'var(--muted)',marginBottom:16,lineHeight:1.5}}>Quelles zones ont été mal analysées ? (coche celles qui sont fausses)</p>
+          <div style={{display:'flex',flexDirection:'column',gap:6,marginBottom:16}}>
+            {result.zones.map(z=>(<label key={z.zone} style={{display:'flex',alignItems:'center',gap:10,padding:'10px 12px',background:zonesFalses.includes(z.zone)?'rgba(196,90,106,0.08)':'#FAFAFA',border:`1px solid ${zonesFalses.includes(z.zone)?'rgba(196,90,106,0.3)':'transparent'}`,borderRadius:10,cursor:'pointer',fontSize:13}}>
+              <input type="checkbox" checked={zonesFalses.includes(z.zone)} onChange={()=>toggle(z.zone)} style={{accentColor:'var(--accent)'}}/>
+              <span style={{flex:1}}>{z.emoji} {z.zone}</span>
+              <span style={{fontSize:11,color:'var(--muted)'}}>{z.status==='nu'?'détecté nu':'détecté maquillé'}</span>
+            </label>))}
+          </div>
+          <textarea value={comment} onChange={e=>setComment(e.target.value)} placeholder="Optionnel : précise ce qui était faux (ex: pas de fond de teint mais détecté)" style={{width:'100%',minHeight:60,padding:10,border:'1px solid var(--border)',borderRadius:10,fontSize:13,fontFamily:'inherit',resize:'vertical',marginBottom:14}}/>
+          <div style={{display:'flex',gap:8}}>
+            <button className="nylva-btn-ghost" onClick={()=>setOpen(false)} style={{flex:1}}>Annuler</button>
+            <button className="nylva-btn-primary" onClick={submit} disabled={sending||zonesFalses.length===0} style={{flex:1}}>{sending?'...':'Envoyer'}</button>
+          </div>
+        </>)}
+      </div>
+    </div>)}
+  </>)
+}
+
 export default function PageVisage() {
   const videoRef=useRef<HTMLVideoElement>(null),canvasRef=useRef<HTMLCanvasElement>(null),streamRef=useRef<MediaStream|null>(null),fileRef=useRef<HTMLInputElement>(null)
   const [phase,setPhase]=useState<'idle'|'camera'|'preview'|'loading'|'result'>('idle')
@@ -50,7 +122,37 @@ export default function PageVisage() {
   const [isPremium,setIsPremium]=useState(false)
   const [expandedZone,setExpandedZone]=useState<number|null>(null)
 
-  useEffect(()=>{createClient().auth.getUser().then(async({data})=>{if(!data.user)return;const{data:p}=await createClient().from('profiles').select('analyses_count_month,is_premium,is_admin').eq('id',data.user.id).single();if(p){const u=p.is_premium||p.is_admin;const l=u?999:Math.max(0,3-p.analyses_count_month);setAnalysesLeft(l);setCanAnalyse(l>0||u);setIsPremium(u)}})},[])
+  const [tier,setTier]=useState<'free'|'essentiel'|'signature'>('free')
+
+  useEffect(()=>{
+    const supabase=createClient()
+    supabase.auth.getUser().then(async({data})=>{
+      if(!data.user)return
+      const{data:p}=await supabase.from('profiles').select('analyses_count_month,is_premium,is_admin,premium_until,tier').eq('id',data.user.id).single()
+      if(!p)return
+      // Vérif côté client : premium expiré → retombe en free
+      const expired=p.premium_until&&new Date(p.premium_until)<new Date()
+      const effectiveTier:'free'|'essentiel'|'signature'=p.is_admin?'signature':(expired?'free':((p.tier as any)??'free'))
+      const u=effectiveTier!=='free'||p.is_admin
+      const l=u?999:Math.max(0,3-p.analyses_count_month)
+      setAnalysesLeft(l)
+      setCanAnalyse(l>0||u)
+      setIsPremium(u)
+      setTier(effectiveTier)
+    })
+  },[])
+
+  // Capture depuis le miroir IA → sessionStorage
+  useEffect(()=>{
+    try{
+      const captured=sessionStorage.getItem('nylva_capture')
+      if(captured){
+        sessionStorage.removeItem('nylva_capture')
+        setImageB64(captured)
+        setPhase('preview')
+      }
+    }catch{}
+  },[])
   useEffect(()=>{if(phase==='camera'&&streamRef.current&&videoRef.current){const v=videoRef.current;v.srcObject=streamRef.current;v.onloadedmetadata=()=>v.play().catch(()=>{})}},[phase])
   useEffect(()=>{if(phase!=='result')window.speechSynthesis?.cancel()},[phase])
 
@@ -62,13 +164,13 @@ export default function PageVisage() {
   const reset=()=>{window.speechSynthesis?.cancel();stopCamera();setPhase('idle');setImageB64(null);setResult(null);setError(null);setExpandedZone(null);if(fileRef.current)fileRef.current.value=''}
   const scoreColor=(s:number)=>s>=75?'#5A9E7A':s>=50?'#C4863A':'#C45A6A'
   const scoreLabel=(s:number)=>s>=80?'Excellent ✨':s>=65?'Bien posé 👍':s>=45?'À peaufiner 💡':s>0?'À retravailler 🔄':'Sans maquillage'
-  const checkout=async()=>{const{url}=await(await fetch('/api/stripe/checkout',{method:'POST'})).json();if(url)window.location.href=url}
+  const checkout=()=>{window.location.href='/pricing'}
 
   return(
     <div style={{padding:'20px',maxWidth:480,margin:'0 auto'}}>
       <div style={{marginBottom:24}}>
         <h1 style={{fontFamily:"'Cormorant Garamond',serif",fontWeight:300,fontSize:30,marginBottom:4}}>Analyse visage</h1>
-        <p style={{color:'var(--muted)',fontSize:13}}>{isPremium?'✦ Analyses illimitées · Premium':`${analysesLeft} analyse${analysesLeft!==1?'s':''} gratuite${analysesLeft!==1?'s':''} restante${analysesLeft!==1?'s':''} ce mois`}</p>
+        <p style={{color:'var(--muted)',fontSize:13}}>{tier==='signature'?'✨ Analyses illimitées · Signature':tier==='essentiel'?'✦ Analyses illimitées · Essentiel':`${analysesLeft} analyse${analysesLeft!==1?'s':''} gratuite${analysesLeft!==1?'s':''} restante${analysesLeft!==1?'s':''} ce mois`}</p>
       </div>
 
       {phase==='idle'&&(<div style={{display:'flex',flexDirection:'column',gap:12}}>
@@ -77,7 +179,7 @@ export default function PageVisage() {
           <div style={{textAlign:'center'}}><p style={{fontWeight:600,marginBottom:4,fontSize:15}}>{canAnalyse?'Prendre une photo':'Limite atteinte'}</p><p style={{color:'var(--muted)',fontSize:12,lineHeight:1.5}}>{canAnalyse?'Face caméra · lumière naturelle · sans filtre':'3 analyses gratuites/mois'}</p></div>
         </div>
         {canAnalyse&&(<><input ref={fileRef} type="file" accept="image/*" style={{display:'none'}} onChange={importPhoto}/><button className="nylva-btn-ghost" onClick={()=>fileRef.current?.click()} style={{display:'flex',alignItems:'center',justifyContent:'center',gap:8}}><Upload size={15}/>Importer depuis la galerie</button></>)}
-        {!canAnalyse&&(<div style={{background:'linear-gradient(135deg,rgba(196,117,138,0.08),rgba(184,147,74,0.08))',border:'1px solid rgba(196,117,138,0.25)',borderRadius:16,padding:20,textAlign:'center'}}><Sparkles size={20} style={{color:'var(--accent)',marginBottom:8}}/><p style={{fontSize:13,color:'var(--text2)',marginBottom:14,lineHeight:1.6}}>Analyses illimitées · Miroir IA · Coach vocal · Saison chromatique</p><button className="nylva-btn-primary" style={{background:'linear-gradient(135deg,var(--accent),var(--gold))'}} onClick={checkout}>✦ Passer Premium — 9€/mois</button></div>)}
+        {!canAnalyse&&(<div style={{background:'linear-gradient(135deg,rgba(196,117,138,0.08),rgba(184,147,74,0.08))',border:'1px solid rgba(196,117,138,0.25)',borderRadius:16,padding:20,textAlign:'center'}}><Sparkles size={20} style={{color:'var(--accent)',marginBottom:8}}/><p style={{fontSize:13,color:'var(--text2)',marginBottom:14,lineHeight:1.6}}>Analyses illimitées · Coach IA · Saison chromatique · et plus</p><button className="nylva-btn-primary" style={{background:'linear-gradient(135deg,var(--accent),var(--gold))'}} onClick={checkout}>✦ Découvrir les abonnements</button></div>)}
         {error&&<div style={{background:'rgba(196,90,106,0.08)',border:'1px solid rgba(196,90,106,0.25)',borderRadius:12,padding:12,color:'var(--red)',fontSize:13}}>{error}</div>}
       </div>)}
 
@@ -105,7 +207,9 @@ export default function PageVisage() {
             </div>))}
           </div>
         </div>
-        {!isPremium&&<div style={{background:'linear-gradient(135deg,rgba(196,117,138,0.07),rgba(184,147,74,0.07))',border:'1px solid rgba(196,117,138,0.2)',borderRadius:16,padding:18,marginBottom:16,textAlign:'center'}}><p style={{fontSize:13,color:'var(--text2)',marginBottom:12,lineHeight:1.55}}>{analysesLeft===0?'Tu as utilisé toutes tes analyses gratuites ce mois-ci.':`Il te reste ${analysesLeft} analyse${analysesLeft>1?'s':''} gratuite${analysesLeft>1?'s':''}.`}</p><button className="nylva-btn-primary" style={{background:'linear-gradient(135deg,var(--accent),var(--gold))',fontSize:13}} onClick={checkout}>✦ Analyses illimitées — 9€/mois</button></div>}
+        {result.tenue&&result.maquillage_detecte!==false&&<TenueCard tenue={result.tenue}/>}
+        {!isPremium&&<div style={{background:'linear-gradient(135deg,rgba(196,117,138,0.07),rgba(184,147,74,0.07))',border:'1px solid rgba(196,117,138,0.2)',borderRadius:16,padding:18,marginBottom:16,textAlign:'center'}}><p style={{fontSize:13,color:'var(--text2)',marginBottom:12,lineHeight:1.55}}>{analysesLeft===0?'Tu as utilisé toutes tes analyses gratuites ce mois-ci.':`Il te reste ${analysesLeft} analyse${analysesLeft>1?'s':''} gratuite${analysesLeft>1?'s':''}.`}</p><button className="nylva-btn-primary" style={{background:'linear-gradient(135deg,var(--accent),var(--gold))',fontSize:13}} onClick={checkout}>✦ Découvrir les abonnements</button></div>}
+        <FeedbackLink result={result}/>
         <button className="nylva-btn-ghost" onClick={reset}><RefreshCw size={13} style={{display:'inline',marginRight:8}}/>Nouvelle analyse</button>
       </div>)}
     </div>

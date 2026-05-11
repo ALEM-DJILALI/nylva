@@ -10,12 +10,12 @@ import { Zap, X } from 'lucide-react'
    ───────────────────────────────────────────── */
 
 const ZONES = [
-  { id: 'teint',     label: 'Teint',     color: 'rgba(196,117,138,0.55)', indices: [10,338,297,332,284,251,389,356,454,323,361,288,397,365,379,378,400,377,152,148,176,149,150,136,172,58,132,93,234,127,162,21,54,103,67,109] },
-  { id: 'yeux_g',   label: 'Œil G',     color: 'rgba(90,158,122,0.7)',   indices: [33,7,163,144,145,153,154,155,133,173,157,158,159,160,161,246] },
-  { id: 'yeux_d',   label: 'Œil D',     color: 'rgba(90,158,122,0.7)',   indices: [362,382,381,380,374,373,390,249,263,466,388,387,386,385,384,398] },
-  { id: 'levres',   label: 'Lèvres',    color: 'rgba(184,147,74,0.75)',  indices: [61,185,40,39,37,0,267,269,270,409,291,375,321,405,314,17,84,181,91,146] },
-  { id: 'sourcils', label: 'Sourcils',  color: 'rgba(196,134,58,0.7)',   indices: [70,63,105,66,107,336,296,334,293,300] },
-  { id: 'nez',      label: 'Nez',       color: 'rgba(155,128,112,0.45)', indices: [1,2,5,4,6,19,94,125,141,235,236,198,209,49,48,198,197,196,174,188,187,186,92,165,167] },
+  { id: 'teint',     label: 'Teint',     color: 'rgba(196,117,138,0.18)', indices: [10,338,297,332,284,251,389,356,454,323,361,288,397,365,379,378,400,377,152,148,176,149,150,136,172,58,132,93,234,127,162,21,54,103,67,109] },
+  { id: 'yeux_g',   label: 'Œil G',     color: 'rgba(90,158,122,0.30)',   indices: [33,7,163,144,145,153,154,155,133,173,157,158,159,160,161,246] },
+  { id: 'yeux_d',   label: 'Œil D',     color: 'rgba(90,158,122,0.30)',   indices: [362,382,381,380,374,373,390,249,263,466,388,387,386,385,384,398] },
+  { id: 'levres',   label: 'Lèvres',    color: 'rgba(184,147,74,0.35)',  indices: [61,185,40,39,37,0,267,269,270,409,291,375,321,405,314,17,84,181,91,146] },
+  { id: 'sourcils', label: 'Sourcils',  color: 'rgba(155,98,45,0.30)',   indices: [70,63,105,66,107,336,296,334,293,300] },
+  { id: 'nez',      label: 'Nez',       color: 'rgba(155,128,112,0.18)', indices: [1,2,5,4,6,19,94,125,141,235,236,198,209,49,48,198,197,196,174,188,187,186,92,165,167] },
 ]
 
 type ZoneStatus = 'ok' | 'warn' | 'err' | null
@@ -32,18 +32,42 @@ export default function PageMiroir() {
   const [tip, setTip]       = useState<string>('Positionne ton visage dans le cadre')
   const [detected, setDetected] = useState(false)
   const [activeZone, setActiveZone] = useState<string | null>(null)
+  const [tier, setTier] = useState<'free'|'essentiel'|'signature'|'loading'>('loading')
+
+  // Vérif tier dès le mount
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const { createClient } = await import('@/lib/supabase')
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) { if (!cancelled) setTier('free'); return }
+        const { data } = await supabase.from('profiles').select('tier,is_admin,is_premium,premium_until').eq('id', user.id).single()
+        if (cancelled) return
+        const expired = data?.premium_until && new Date(data.premium_until) < new Date()
+        if (data?.is_admin) setTier('signature')
+        else if (expired) setTier('free')
+        else setTier((data?.tier as any) ?? 'free')
+      } catch {
+        if (!cancelled) setTier('free')
+      }
+    })()
+    return () => { cancelled = true }
+  }, [])
 
   // Conseils rotatifs quand visage détecté
   const tips = [
     'Lumière naturelle de face pour une analyse optimale',
     'Garde ton visage immobile quelques secondes',
-    'NYLVA analyse tes zones en temps réel',
-    'Cligne des yeux normalement — le suivi s\'adapte',
-    'Ton profil beauté est mémorisé automatiquement',
+    'NYLVA détecte 478 points faciaux en direct',
+    'Tu peux toucher une zone pour la mettre en avant',
+    'Tout est traité localement — aucune photo envoyée',
   ]
   const tipIdx = useRef(0)
 
   useEffect(() => {
+    if (tier !== 'signature') return  // n'initialise la caméra que pour Signature
     let mounted = true
 
     const init = async () => {
@@ -93,7 +117,7 @@ export default function PageMiroir() {
       streamRef.current?.getTracks().forEach(t => t.stop())
       detRef.current?.close?.()
     }
-  }, [])
+  }, [tier])
 
   // Rotation des conseils
   useEffect(() => {
@@ -137,10 +161,9 @@ export default function PageMiroir() {
 
       setDetected(true)
 
-      // Dessiner overlay zones
-      ctx.save()
-      ctx.scale(-1, 1)  // Miroir horizontal
-      ctx.translate(-W, 0)
+      // Dessiner overlay zones (le miroir horizontal est appliqué via CSS sur le canvas,
+      // donc pas besoin de transformer le contexte ici - les coordonnées MediaPipe
+      // correspondent directement au flux vidéo non-mirroré)
 
       ZONES.forEach(zone => {
         const pts = zone.indices.map(i => ({ x: lm[i].x * W, y: lm[i].y * H }))
@@ -150,22 +173,30 @@ export default function PageMiroir() {
         ctx.moveTo(pts[0].x, pts[0].y)
         pts.slice(1).forEach(p => ctx.lineTo(p.x, p.y))
         ctx.closePath()
-        ctx.fillStyle = zone.id === activeZone ? zone.color.replace('0.5', '0.75') : zone.color
+        ctx.fillStyle = zone.id === activeZone ? zone.color.replace(/0\.\d+/, '0.55') : zone.color
         ctx.fill()
+        // Contour fin pour mieux délimiter
+        ctx.strokeStyle = zone.color.replace(/0\.\d+/, '0.9')
+        ctx.lineWidth = 1.5
+        ctx.stroke()
 
-        // Label zone
+        // Label zone — on le dessine en miroir inverse pour qu'il soit lisible
+        // une fois le canvas mirroré par CSS
         const cx = pts.reduce((s, p) => s + p.x, 0) / pts.length
         const cy = pts.reduce((s, p) => s + p.y, 0) / pts.length
+        ctx.save()
+        ctx.translate(cx, cy)
+        ctx.scale(-1, 1)  // contre-miroir uniquement pour le texte
         ctx.fillStyle = '#FFFFFF'
-        ctx.font = 'bold 10px DM Sans, sans-serif'
+        ctx.font = '600 11px DM Sans, sans-serif'
         ctx.textAlign = 'center'
-        ctx.shadowColor = 'rgba(0,0,0,0.4)'
-        ctx.shadowBlur = 3
-        ctx.fillText(zone.label, cx, cy)
+        ctx.textBaseline = 'middle'
+        ctx.shadowColor = 'rgba(0,0,0,0.6)'
+        ctx.shadowBlur = 4
+        ctx.fillText(zone.label, 0, 0)
         ctx.shadowBlur = 0
+        ctx.restore()
       })
-
-      ctx.restore()
 
       // Indicateur détection
       drawDetected(ctx, W, H)
@@ -187,12 +218,66 @@ export default function PageMiroir() {
   }
 
   const drawDetected = (ctx: CanvasRenderingContext2D, W: number, H: number) => {
+    // Canvas mirroré par CSS, donc x=20 affiche à droite à l'écran
     ctx.save()
     ctx.beginPath()
-    ctx.arc(W - 20, 20, 6, 0, Math.PI * 2)
+    ctx.arc(20, 20, 6, 0, Math.PI * 2)
     ctx.fillStyle = '#5A9E7A'
     ctx.fill()
     ctx.restore()
+  }
+
+  // ─── Écran de gating selon tier ───
+  if (tier === 'loading') {
+    return (
+      <div style={{ padding: '20px', maxWidth: 480, margin: '0 auto', textAlign: 'center', paddingTop: 80 }}>
+        <div className="pulse" style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 48, color: 'var(--accent)' }}>◈</div>
+      </div>
+    )
+  }
+
+  if (tier !== 'signature') {
+    return (
+      <div style={{ padding: '20px', maxWidth: 480, margin: '0 auto' }}>
+        <div style={{ marginBottom: 20 }}>
+          <h1 style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 300, fontSize: 30, marginBottom: 4 }}>
+            Miroir Intelligent
+          </h1>
+          <p style={{ color: 'var(--muted)', fontSize: 13 }}>
+            Analyse faciale en temps réel
+          </p>
+        </div>
+
+        <div className="nylva-card" style={{
+          textAlign: 'center', padding: '40px 24px',
+          background: 'linear-gradient(160deg, #FFFFFF 0%, #FDF5F7 100%)',
+          border: '1px solid rgba(184,147,74,0.25)',
+        }}>
+          <div style={{ fontSize: 38, marginBottom: 12 }}>✨</div>
+          <p style={{ fontSize: 11, color: 'var(--gold)', textTransform: 'uppercase', letterSpacing: '0.15em', fontWeight: 600, marginBottom: 8 }}>
+            Réservé à Signature
+          </p>
+          <h2 style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 400, fontSize: 24, marginBottom: 12, lineHeight: 1.3 }}>
+            Le Miroir Intelligent t'attend
+          </h2>
+          <p style={{ color: 'var(--text2)', fontSize: 13, lineHeight: 1.65, marginBottom: 22, maxWidth: 320, margin: '0 auto 22px' }}>
+            Détection faciale en temps réel via IA. 478 points analysés sur ton visage pour suivre tes zones beauté zone par zone, sans envoyer de photo.
+          </p>
+          <button
+            className="nylva-btn-primary"
+            onClick={() => window.location.href = '/pricing'}
+            style={{ background: 'linear-gradient(135deg, var(--accent), var(--gold))', color: '#FFFFFF' }}
+          >
+            {tier === 'essentiel' ? 'Passer à Signature' : 'Découvrir Signature'}
+          </button>
+          {tier === 'free' && (
+            <p style={{ fontSize: 11, color: 'var(--muted)', marginTop: 12 }}>
+              7 jours d'essai gratuit, sans engagement
+            </p>
+          )}
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -215,7 +300,7 @@ export default function PageMiroir() {
         />
         <canvas
           ref={canvasRef}
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', transform: 'scaleX(-1)', mixBlendMode: 'screen' }}
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', transform: 'scaleX(-1)', pointerEvents: 'none' }}
         />
 
         {/* Loader */}
@@ -244,6 +329,39 @@ export default function PageMiroir() {
           </div>
         )}
       </div>
+
+      {/* Capture button — redirige vers analyse complète */}
+      {ready && detected && (
+        <button
+          onClick={() => {
+            const v = videoRef.current
+            if (!v) return
+            const c = document.createElement('canvas')
+            c.width = v.videoWidth
+            c.height = v.videoHeight
+            const ctx = c.getContext('2d')!
+            // Mirror horizontal pour matcher l'affichage
+            ctx.translate(c.width, 0)
+            ctx.scale(-1, 1)
+            ctx.drawImage(v, 0, 0)
+            try {
+              sessionStorage.setItem('nylva_capture', c.toDataURL('image/jpeg', 0.85).split(',')[1])
+              window.location.href = '/app?source=miroir'
+            } catch {
+              // sessionStorage peut échouer si trop gros — fallback : juste rediriger
+              window.location.href = '/app'
+            }
+          }}
+          className="nylva-btn-primary"
+          style={{
+            width: '100%', marginBottom: 16,
+            background: 'linear-gradient(135deg, var(--accent), var(--gold))',
+            color: '#FFFFFF', fontSize: 13,
+          }}
+        >
+          📸 Capturer pour analyse complète
+        </button>
+      )}
 
       {/* Zones legend */}
       {ready && (

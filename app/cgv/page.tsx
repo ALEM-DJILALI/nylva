@@ -20,13 +20,14 @@ export default function PageCGV() {
         <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20, marginBottom: 12 }}>2. Service</h2>
         <ul style={{ fontSize: 14, lineHeight: 2, color: '#4A3728', paddingLeft: 20 }}>
           <li>Gratuit : 3 analyses/mois</li>
-          <li>Premium : analyses illimitées + Coach IA + Saison + Historique — 9€/mois</li>
+          <li>Essentiel : analyses illimitées, saison chromatique, coach texte (30 messages/jour), marques — 6,99€/mois ou 59€/an</li>
+          <li>Signature : tout l&apos;Essentiel + coach vocal, miroir IA, morphologie, historique illimité — 14,99€/mois ou 129€/an</li>
         </ul>
       </section>
 
       <section style={{ marginBottom: 32 }}>
         <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20, marginBottom: 12 }}>3. Prix</h2>
-        <p style={{ fontSize: 14, lineHeight: 1.8, color: '#4A3728' }}>9€ TTC/mois prélevé via Stripe. TVA française applicable.</p>
+        <p style={{ fontSize: 14, lineHeight: 1.8, color: '#4A3728' }}>Tarifs TTC, TVA française applicable. Prélèvement via Stripe. Période d&apos;essai de 7 jours offerte sur l&apos;abonnement Signature, sans engagement.</p>
       </section>
 
       <section style={{ marginBottom: 32 }}>

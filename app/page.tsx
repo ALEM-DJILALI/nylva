@@ -49,7 +49,7 @@ export default function LandingPage() {
         <a href="#" className="nav-logo">N<em>Y</em>LVA</a>
         <div className="nav-links">
           <a href="#features">Fonctionnalités</a>
-          <a href="#pricing">Tarifs</a>
+          <a href="/pricing">Tarifs</a>
           <button className="nav-cta" onClick={() => router.push('/auth')}>Commencer</button>
         </div>
       </nav>
@@ -166,7 +166,7 @@ export default function LandingPage() {
         <span className="footer-copy">2025 NYLVA · OCCIMAITRISE · Montauban, France</span>
         <div className="footer-links">
           <a href="mailto:contact@nylva.fr">Contact</a>
-          <a href="#pricing">Tarifs</a>
+          <a href="/pricing">Tarifs</a>
           <a href="#features">Fonctionnalités</a>
         </div>
       </footer>

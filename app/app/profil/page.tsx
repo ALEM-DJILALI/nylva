@@ -14,6 +14,7 @@ type Profile = {
   rouge_levres: string
   correcteur: string
   is_premium: boolean
+  tier: 'free' | 'essentiel' | 'signature'
   analyses_count_month: number
 }
 
@@ -47,17 +48,20 @@ export default function PageProfil() {
         .select('*')
         .eq('id', session.user.id)
         .single()
-      if (p) setProfile(p)
+      if (p) {
+        // Si premium_until est expiré côté client, on force tier=free pour l'affichage
+        // (le cron côté serveur fera le vrai update plus tard)
+        const expired = p.premium_until && new Date(p.premium_until) < new Date()
+        if (expired && !p.is_admin) {
+          p.tier = 'free'
+          p.is_premium = false
+        }
+        setProfile(p)
+      }
       setLoading(false)
     })
   }, [router])
 
-
-  const handleCheckout = async () => {
-    const res = await fetch('/api/stripe/checkout', { method: 'POST' })
-    const { url } = await res.json()
-    if (url) window.location.href = url
-  }
 
   const save = async () => {
     if (!profile) return
@@ -65,7 +69,18 @@ export default function PageProfil() {
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
-    await supabase.from('profiles').update(profile).eq('id', user.id)
+    // Whitelist : seuls les champs profil utilisateur sont updatables côté client.
+    // is_premium / premium_until / is_admin / analyses_count_month sont gérés côté serveur uniquement.
+    const safeUpdate = {
+      prenom: profile.prenom ?? null,
+      teint: profile.teint ?? null,
+      peau: profile.peau ?? null,
+      souston: profile.souston ?? null,
+      fond_teint: profile.fond_teint ?? null,
+      rouge_levres: profile.rouge_levres ?? null,
+      correcteur: profile.correcteur ?? null,
+    }
+    await supabase.from('profiles').update(safeUpdate).eq('id', user.id)
     setSaving(false)
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
@@ -104,15 +119,20 @@ export default function PageProfil() {
           </h1>
           <p style={{ color: 'var(--muted)', fontSize: 13 }}>{email}</p>
         </div>
-        {profile.is_premium && (
-          <span style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(200,169,110,0.1)', border: '1px solid rgba(200,169,110,0.3)', borderRadius: 20, padding: '6px 12px', fontSize: 12, color: 'var(--gold)' }}>
-            <Crown size={12} /> Premium
+        {profile.tier === 'signature' && (
+          <span style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'linear-gradient(135deg, rgba(196,117,138,0.12), rgba(184,147,74,0.12))', border: '1px solid rgba(184,147,74,0.4)', borderRadius: 20, padding: '6px 12px', fontSize: 12, color: 'var(--gold)', fontWeight: 600 }}>
+            <Crown size={12} /> Signature
+          </span>
+        )}
+        {profile.tier === 'essentiel' && (
+          <span style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(196,117,138,0.1)', border: '1px solid rgba(196,117,138,0.3)', borderRadius: 20, padding: '6px 12px', fontSize: 12, color: 'var(--accent)', fontWeight: 600 }}>
+            ✦ Essentiel
           </span>
         )}
       </div>
 
       {/* Quota */}
-      {!profile.is_premium && (
+      {profile.tier === 'free' && (
         <div className="nylva-card" style={{ marginBottom: 16 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
             <span style={{ fontSize: 13, color: 'var(--text2)' }}>Analyses ce mois</span>
@@ -125,10 +145,25 @@ export default function PageProfil() {
           </div>
           <button
             className="nylva-btn-primary"
-            onClick={handleCheckout}
-            style={{ marginTop: 12, background: 'linear-gradient(135deg,#C59FD8,#C8A96E)', color: '#0A0709', fontSize: 13 }}
+            onClick={() => router.push('/pricing')}
+            style={{ marginTop: 12, background: 'linear-gradient(135deg,var(--accent),var(--gold))', color: '#FFFFFF', fontSize: 13 }}
           >
-            ✦ Passer Premium — 9€/mois
+            ✦ Découvrir les abonnements
+          </button>
+        </div>
+      )}
+
+      {profile.tier === 'essentiel' && (
+        <div className="nylva-card" style={{ marginBottom: 16, background: 'linear-gradient(160deg, #FFFFFF, #FDF5F7)', border: '1px solid rgba(196,117,138,0.25)' }}>
+          <p style={{ fontSize: 13, color: 'var(--text2)', marginBottom: 10, lineHeight: 1.55 }}>
+            ✨ Tu profites de NYLVA <strong>Essentiel</strong>. Pour le coach vocal, le miroir IA et la morphologie, passe à Signature.
+          </p>
+          <button
+            className="nylva-btn-primary"
+            onClick={() => router.push('/pricing')}
+            style={{ background: 'linear-gradient(135deg,var(--accent),var(--gold))', color: '#FFFFFF', fontSize: 13 }}
+          >
+            Passer à Signature
           </button>
         </div>
       )}

@@ -2,6 +2,13 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+
+  // Routes API publiques (Stripe webhook DOIT passer sans auth)
+  if (pathname.startsWith('/api/stripe/webhook')) {
+    return NextResponse.next()
+  }
+
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -24,7 +31,7 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
 
   // Routes publiques
-  if (request.nextUrl.pathname === '/' || request.nextUrl.pathname.startsWith('/auth')) {
+  if (pathname === '/' || pathname.startsWith('/auth') || pathname.startsWith('/cgv') || pathname.startsWith('/mentions-legales') || pathname.startsWith('/politique-confidentialite')) {
     return supabaseResponse
   }
 
@@ -38,7 +45,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Protection /admin → vérif is_admin
-  if (request.nextUrl.pathname.startsWith('/admin')) {
+  if (pathname.startsWith('/admin')) {
     const { data: profile } = await supabase
       .from('profiles')
       .select('is_admin')
@@ -58,5 +65,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|icons|manifest.webmanifest|sw.js|workbox-.*|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
 }
