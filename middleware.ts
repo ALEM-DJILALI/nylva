@@ -31,7 +31,7 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
 
   // Routes publiques
-  if (pathname === '/' || pathname.startsWith('/auth') || pathname.startsWith('/cgv') || pathname.startsWith('/mentions-legales') || pathname.startsWith('/politique-confidentialite')) {
+  if (pathname === '/' || pathname.startsWith('/auth') || pathname.startsWith('/pricing') || pathname.startsWith('/cgv') || pathname.startsWith('/mentions-legales') || pathname.startsWith('/politique-confidentialite')) {
     return supabaseResponse
   }
 
