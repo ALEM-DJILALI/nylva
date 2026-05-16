@@ -93,45 +93,48 @@ export default function LandingPage() {
       <section className="pricing" id="pricing">
         <div className="section-eyebrow reveal">Tarifs</div>
         <h2 className="reveal">Simple et <em>transparent</em></h2>
+        <p className="reveal" style={{ textAlign: 'center', color: 'var(--muted)', fontSize: 14, marginTop: -8, marginBottom: 32, maxWidth: 460, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.55 }}>
+          Annulable à tout moment, sans engagement.
+        </p>
         <div className="pricing-grid">
           <div className="price-card reveal">
             <div className="price-label">Gratuit</div>
             <div className="price-amount">0<em>€</em></div>
             <div className="price-period">pour toujours</div>
             <ul className="price-features">
-              <li>Analyse visage MediaPipe</li>
-              <li>Scan produit (code-barres)</li>
+              <li>3 analyses IA / mois</li>
+              <li>Miroir visage MediaPipe</li>
+              <li>Catalogue marques (consultation)</li>
               <li>Profil beauté complet</li>
-              <li>Catalogue 12 marques</li>
-              <li>3 rapports IA / mois</li>
             </ul>
             <button className="btn-ghost btn-full" onClick={() => router.push('/auth')}>Commencer</button>
           </div>
-          <div className="price-card featured reveal reveal-d1">
-            <div className="price-label">Premium</div>
-            <div className="price-amount">9<em>€</em></div>
-            <div className="price-period">par mois · sans engagement</div>
+          <div className="price-card reveal reveal-d1">
+            <div className="price-label">Essentiel</div>
+            <div className="price-amount">6,99<em>€</em></div>
+            <div className="price-period">par mois · ou 59€/an (−30%)</div>
             <ul className="price-features">
-              <li>Tout le gratuit inclus</li>
-              <li>Rapports IA illimités</li>
-              <li>Historique des analyses</li>
-              <li>Routines beauté personnalisées</li>
-              <li>Accès prioritaire nouveautés</li>
+              <li>Analyses IA illimitées</li>
+              <li>Saison chromatique</li>
+              <li>Coach IA texte (30 messages/jour)</li>
+              <li>Recommandations marques personnalisées</li>
+              <li>Historique 3 mois</li>
             </ul>
-            <button className="btn-primary btn-full" onClick={() => router.push('/auth')}>Essai 30 jours offert</button>
+            <button className="btn-ghost btn-full" onClick={() => router.push('/pricing')}>Choisir Essentiel</button>
           </div>
-          <div className="price-card reveal reveal-d2">
-            <div className="price-label">Marques &amp; Pro</div>
-            <div className="price-amount price-amount-sm">Sur devis</div>
-            <div className="price-period">partenariat marque</div>
+          <div className="price-card featured reveal reveal-d2">
+            <div className="price-label">Signature</div>
+            <div className="price-amount">14,99<em>€</em></div>
+            <div className="price-period">par mois · ou 129€/an (−28%)</div>
             <ul className="price-features">
-              <li>Dashboard insights anonymisés</li>
-              <li>Placement produits ciblé</li>
-              <li>Données teint agrégées</li>
-              <li>Campagnes affiliation</li>
-              <li>API accès marque</li>
+              <li>Tout l'Essentiel</li>
+              <li>Coach IA vocal (voix naturelle)</li>
+              <li>Miroir IA temps réel</li>
+              <li>Analyse morphologie du visage</li>
+              <li>Historique illimité + progression</li>
+              <li>Saison chromatique illimitée</li>
             </ul>
-            <a href="mailto:contact@nylva.fr" className="btn-ghost btn-full">Nous contacter</a>
+            <button className="btn-primary btn-full" onClick={() => router.push('/pricing')}>7 jours d'essai gratuit</button>
           </div>
         </div>
       </section>
@@ -140,7 +143,7 @@ export default function LandingPage() {
         <div className="waitlist-inner">
           <div className="section-eyebrow reveal">Accès anticipé</div>
           <h2 className="reveal waitlist-h2">Sois parmi les<br /><em>premiers·ères</em></h2>
-          <p className="waitlist-sub reveal">Rejoins la liste et reçois 30 jours de premium offert au lancement.</p>
+          <p className="waitlist-sub reveal">Rejoins la liste et reçois 1 mois d'abonnement Essentiel offert au lancement.</p>
           <div className="reveal reveal-d1">
             {waitlistDone ? (
               <div className="success-msg">Tu es sur la liste ! On t'envoie ton accès dès l'ouverture.</div>
